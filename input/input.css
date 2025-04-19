@@ -1,0 +1,135 @@
+/* Reset default margins and styles */
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+/* Global styles */
+body {
+    font-family: sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align items to the top */
+    height: 100vh;
+    flex-direction: column; /* Stack content vertically */
+    padding: 0 10px; /* Prevent any margins from pushing content out of view */
+    overflow-y: auto; /* Allow scrolling vertically when needed */
+}
+
+/* Input list page (this is the box where inputs go) */
+.name-box {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: 400px;
+    margin-top: 20px;  /* Space from top of the screen */
+    max-height: 80vh; /* Max height of the box to avoid going off-screen */
+    overflow-y: auto; /* Allow the box to scroll vertically if content overflows */
+    margin-left: auto; /* Center the box horizontally */
+    margin-right: auto; /* Center the box horizontally */
+    flex-shrink: 0; /* Prevent the box from shrinking */
+}
+
+/* Welcome message */
+#welcome {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+/* Style for input list (name inputs) */
+#input-list {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}
+
+/* Style the input-wrapper div */
+.input-wrapper {
+    position: relative;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+/* Style the input field */
+.name-input {
+    padding: 10px;
+    padding-right: 40px; /* Space for the "X" inside the input */
+    width: 100%; /* Make the input field take up full width */
+    font-size: 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-sizing: border-box; /* Make sure padding is considered in width calculation */
+}
+
+/* Small delete button (X) */
+.delete-btn {
+    position: absolute;
+    top: 50%; /* Vertically center the X */
+    right: 10px; /* Position the X inside the input field on the right border */
+    transform: translateY(-50%); /* Ensure the X is perfectly centered vertically */
+    background: none;
+    border: none;
+    color: red;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    opacity: 0; /* Make the delete button hidden by default */
+    transition: opacity 0.3s ease; /* Smooth transition for button appearance */
+}
+
+/* Show the delete button when hovering over the input field */
+.input-wrapper:hover .delete-btn {
+    opacity: 1; /* Make the X visible */
+}
+
+/* Optional: Remove the delete button when the input loses focus */
+.name-input:focus ~ .delete-btn {
+    opacity: 1;
+}
+
+/* Disable scrolling in the input box */
+.name-box {
+    overflow-y: auto;
+    /* Disabling the scroll wheel for the input box */
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;  /* Hide scrollbars for Firefox */
+}
+
+/* Optional: Global styles to make sure the page scrolls instead of input box */
+body {
+    overflow-y: auto;
+}
+
+/* Prevent the page from jumping with content overflow */
+html, body {
+    height: 100%;
+}
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    color: #666;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.2s ease;
+    z-index: 10;
+}
+
+.arrow:hover {
+    color: #000;
+}
+
+.arrow.left {
+    left: calc(50% - 230px); /* adjust depending on box width */
+}
+
+.arrow.right {
+    right: calc(50% - 230px);
+}
