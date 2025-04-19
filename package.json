@@ -1,0 +1,11 @@
+{
+  "name": "fordavid",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "ronen",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "firebase": "^11.6.0"
+  }
+}

@@ -1,0 +1,18 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+.return-arrow {
+    position: fixed;
+    font-size: 30px;
+    color: black;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000; /* keep on top */
+}
+
+.return-arrow:hover {
+    color: rgb(114, 108, 108);
+}
