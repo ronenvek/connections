@@ -251,9 +251,8 @@ let isDragging = false;
 let startX, startY;
 
 function handleScroll(event) {
+		event.preventDefault();
     scrolls = -event.deltaY / 120;
-
-
 }
 function getMouseLocation(event) {
     mouseX = event.clientX;
@@ -263,6 +262,7 @@ function getMouseLocation(event) {
 let moving = "";
 
 function onMouseDown(event) {
+		event.preventDefault();
     if (event.button === 0) {
         isDragging = true;
         startX = event.clientX;
@@ -294,36 +294,7 @@ function onMouseDown(event) {
 
     }
     else if (event.button === 1){
-        event.preventDefault();
-
-        let found = false;
-        network.clear();
-        circles.forEach((value, key) => {
-            if (found)
-                return;
-            let c = toCircle(value)
-
-            let x = c[0];
-            let y = c[1];
-            let r = c[2];
-
-            if (x + r <= 0 || y + r <= 0 || x - r >= width || y - r >= height)
-                return;
-
-            let d = Math.pow(x - event.clientX, 2) + Math.pow(y - event.clientY, 2)
-            if (d < Math.pow(r, 2)){
-                if (selected === key)
-                    selected = "";
-                else{
-                    selected = key;
-                    selectNetwork(key, 0);
-                }
-                found = true;
-            }
-        })
-        if (!found)
-            selected = "";
-
+				handleSelection(event.clientX, event.clientY);
     }
 
 
@@ -343,6 +314,7 @@ function selectNetwork(name, jump){
 }
 
 function onMouseMove(event) {
+		event.preventDefault();
     if (moving.length !==0 ){
         let c = circles.get(moving)
         c[0] = event.clientX / scale + xOffset
@@ -362,6 +334,7 @@ function onMouseMove(event) {
 }
 
 function onMouseUp() {
+		event.preventDefault();
     isDragging = false;
     moving = ""
 }
@@ -381,3 +354,159 @@ window.addEventListener('wheel', handleScroll);
 document.addEventListener('contextmenu', function(event) {
     event.preventDefault();
 });
+
+
+function getCanvasPosition(clientX, clientY) {
+    const rect = canvas.getBoundingClientRect();
+    return {
+        x: clientX - rect.left,
+        y: clientY - rect.top
+    };
+}
+
+function handleSelection(clientX, clientY) {
+    const pos = getCanvasPosition(clientX, clientY);
+    let found = false;
+    
+    network.clear();
+    circles.forEach((value, key) => {
+        if (found) return;
+        
+        const circlePos = toCircle(value);
+        const dx = pos.x - circlePos[0];
+        const dy = pos.y - circlePos[1];
+        const radius = circlePos[2];
+        
+        if (dx*dx + dy*dy < radius*radius) {
+            if (selected === key) {
+                selected = "";
+            } else {
+                selected = key;
+                selectNetwork(key, 0);
+            }
+            found = true;
+        }
+    });
+    
+    if (!found) selected = "";
+}
+let isPinching = false;
+let initialPinchDistance = 0;
+let initialPinchScale = 1;
+let initialPinchXOffset = 0;
+let initialPinchYOffset = 0;
+let initialPinchCenterX = 0;
+let initialPinchCenterY = 0;
+
+function onTouchStart(event) {
+		if (event.touches.length === 1 && isTouchOnButton(event.touches[0].clientX, event.touches[0].clientY)) {
+				return; 
+		}
+		
+    event.preventDefault();
+    if (event.touches.length === 1) {
+				
+        const touch = event.touches[0];
+				handleSelection(touch.clientX, touch.clientY);
+
+        touchIdentifier = touch.identifier;
+        mouseX = touch.clientX;
+        mouseY = touch.clientY;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+    } else if (event.touches.length === 2) {
+        isPinching = true;
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        
+        initialPinchDistance = getDistance(
+            touch1.clientX, touch1.clientY,
+            touch2.clientX, touch2.clientY
+        );
+        initialPinchScale = scale;
+        initialPinchXOffset = xOffset;
+        initialPinchYOffset = yOffset;
+        
+        const screenCenterX = (touch1.clientX + touch2.clientX) / 2;
+        const screenCenterY = (touch1.clientY + touch2.clientY) / 2;
+        initialPinchCenterX = screenCenterX / scale + xOffset;
+        initialPinchCenterY = screenCenterY / scale + yOffset;
+    }
+}
+
+function onTouchMove(event) {
+    event.preventDefault();
+    
+    if (event.touches.length === 1 && !isPinching) {
+        const touch = Array.from(event.touches).find(t => t.identifier === touchIdentifier);
+        if (!touch) return;
+        
+        let deltaX = touch.clientX - startX;
+        let deltaY = touch.clientY - startY;
+        
+        xOffset -= deltaX/scale;
+        yOffset -= deltaY/scale;
+        
+        startX = touch.clientX;
+        startY = touch.clientY;
+        mouseX = touch.clientX;
+        mouseY = touch.clientY;
+        
+    } else if (event.touches.length === 2 && isPinching) {
+        const touch1 = event.touches[0];
+        const touch2 = event.touches[1];
+        
+        const currentDistance = getDistance(
+            touch1.clientX, touch1.clientY,
+            touch2.clientX, touch2.clientY
+        );
+        const screenCenterX = (touch1.clientX + touch2.clientX) / 2;
+        const screenCenterY = (touch1.clientY + touch2.clientY) / 2;
+        
+        const scaleFactor = currentDistance / initialPinchDistance;
+        const newScale = Math.min(Math.max(initialPinchScale * scaleFactor, 0.1), 10);
+        
+        xOffset = initialPinchCenterX - (screenCenterX / newScale);
+        yOffset = initialPinchCenterY - (screenCenterY / newScale);
+        
+        scale = newScale;
+        mouseX = screenCenterX;
+        mouseY = screenCenterY;
+    }
+}
+
+function onTouchEnd(event) {
+    if (event.touches.length === 0) {
+        touchIdentifier = null;
+        isPinching = false;
+    } else if (event.touches.length === 1) {
+        isPinching = false;
+        const remainingTouch = event.touches[0];
+        touchIdentifier = remainingTouch.identifier;
+        startX = remainingTouch.clientX;
+        startY = remainingTouch.clientY;
+    }
+}
+function getDistance(x1, y1, x2, y2) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+
+document.addEventListener('touchstart', onTouchStart, { passive: false });
+document.addEventListener('touchmove', onTouchMove, { passive: false });
+document.addEventListener('touchend', onTouchEnd);
+document.addEventListener('touchcancel', onTouchEnd);
+
+function isTouchOnButton(clientX, clientY) {
+  const button = document.querySelector('.return-arrow');
+  const rect = button.getBoundingClientRect();
+  return (
+    clientX >= rect.left &&
+    clientX <= rect.right &&
+    clientY >= rect.top &&
+    clientY <= rect.bottom
+  );
+}
+
+

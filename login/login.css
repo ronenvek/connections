@@ -18,7 +18,7 @@ body {
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     text-align: center;
-    width: 400px;
+    width: min(80%, 400px);
 }
 
 .login-box h2 {
@@ -68,9 +68,9 @@ body {
 }
 
 .arrow.left {
-    left: calc(50% - 230px);
+    left: calc(50% - min(35%, 200px) - 2.5rem); /* Half box width + arrow offset */
 }
 
 .arrow.right {
-    right: calc(50% - 230px);
+    right: calc(50% - min(35%, 200px) - 2.5rem); /* Half box width + arrow offset */
 }
